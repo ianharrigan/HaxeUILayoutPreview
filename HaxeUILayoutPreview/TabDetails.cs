@@ -191,7 +191,7 @@ namespace HaxeUILayoutPreview {
                 //RedirectTrace(1, pluginMain.settingObject.RedirectTrace);
             }
             if (pluginMain.settingObject.HideMiniMap == true) {
-                GetMiniMap().Hide();
+                HideMiniMap();
             }
         }
 
@@ -211,7 +211,18 @@ namespace HaxeUILayoutPreview {
 
         private Control GetMiniMap() {
             ITabbedDocument tdoc = PluginBase.MainForm.CurrentDocument as ITabbedDocument;
-            return tdoc.Controls[1];
+            Control miniMap = null;
+            if (tdoc.Controls.Count > 1) {
+                miniMap = tdoc.Controls[1];
+            }
+            return miniMap;
+        }
+
+        private void HideMiniMap() {
+            Control miniMap = GetMiniMap();
+            if (miniMap != null) {
+                miniMap.Hide();
+            }
         }
 
         public void Dispose() {
