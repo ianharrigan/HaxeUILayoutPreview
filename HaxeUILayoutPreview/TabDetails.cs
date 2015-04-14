@@ -9,12 +9,15 @@ using PluginCore.Helpers;
 using PluginCore;
 using System.Windows.Forms;
 using System.Xml;
+using System.IO;
+using System.Drawing;
 
 namespace HaxeUILayoutPreview {
     class TabDetails {
         private PluginMain pluginMain;
         private List<Messir.Windows.Forms.TabStrip> strips = new List<Messir.Windows.Forms.TabStrip>();
         private List<AxShockwaveFlashObjects.AxShockwaveFlash> players = new List<AxShockwaveFlashObjects.AxShockwaveFlash>();
+        private OpenFLApplicationDescriptor applicationDescriptor;
 
         public TabDetails(PluginMain pluginMain) {
             this.pluginMain = pluginMain;
@@ -83,6 +86,7 @@ namespace HaxeUILayoutPreview {
                 players.Add(player);
                 editor.Parent.Controls.Add(player);
                 string filename = Util.ExtractPreviewContainer();
+                //filename = "Z:\\GitHub\\flashdevelop-preview-container\\bin\\flash\\bin\\flashdeveloppreviewcontainer.swf";
                 player.LoadMovie(0, filename);
                 player.Play();
             }
@@ -96,6 +100,7 @@ namespace HaxeUILayoutPreview {
             player.Enabled = true;
             ((System.ComponentModel.ISupportInitialize)(player)).EndInit();
             player.FlashCall += new AxShockwaveFlashObjects._IShockwaveFlashEvents_FlashCallEventHandler(player_FlashCall);
+            this.applicationDescriptor = new OpenFLApplicationDescriptor(pluginMain);
             return player;
         }
 
@@ -111,6 +116,31 @@ namespace HaxeUILayoutPreview {
             switch (command) {
                 case "callbacksReady":
                         UpdatePreview(paneIndex);
+                    break;
+
+                case "getBitmapData":
+                        string resourceId = list[0].InnerText;
+                        string resourcePath = this.applicationDescriptor.ResolveResource(resourceId);
+                        //pluginMain.ConsoleLog("Bitmap '" + resourceId + "' resolved to: " + resourcePath);
+                        if (resourceId != null) {
+                            List<int> ints = new List<int>();
+                            Bitmap bmp = new Bitmap(resourcePath);
+                            for (int y = 0; y < bmp.Height; y++) {
+                                for (int x = 0; x < bmp.Width; x++) {
+                                    Color pixel = bmp.GetPixel(x, y);
+                                    ints.Add(pixel.ToArgb());
+                                }
+                            }
+
+                            List<byte> bytes = new List<byte>();
+                            foreach (int i in ints) {
+                                bytes.AddRange(BitConverter.GetBytes(i));
+                            }
+
+                            String base64 = Convert.ToBase64String(bytes.ToArray());
+                            string xmlReturnValue = "<string>" + bmp.Width + "|" + bmp.Height + "|" + base64 + "</string>";
+                            player.SetReturnValue(xmlReturnValue);
+                        }
                     break;
             }
         }

@@ -52,10 +52,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AxShockwaveFlashObjects.cs">
+    <Compile Include="FlashObjects\AxShockwaveFlashObjects.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Interop.ShockwaveFlashObjects.cs" />
+    <Compile Include="FlashObjects\Interop.ShockwaveFlashObjects.cs" />
+    <Compile Include="OpenFLApplicationDescriptor.cs" />
     <Compile Include="PluginConsole.cs">
       <SubType>UserControl</SubType>
     </Compile>
