@@ -100,10 +100,12 @@ namespace HaxeUILayoutPreview
                     //ConsoleLog("detected command " + cmd);
                     break;
 
-                case EventType.UIRefresh: // TODO: not quite sure this is the best way to have split screen editing
+                case EventType.UIRefresh:
                     if (tabDetails.ContainsKey(tdoc)) {
                         TabDetails details = GetTabDetails(tdoc);
-                        details.UpdatePreviews();
+                        if (settingObject.HideMiniMap == true) {
+                            details.HideMiniMap();
+                        }
                     }
                     break;
             }
@@ -125,8 +127,7 @@ namespace HaxeUILayoutPreview
                                                | EventType.FileSwitch
                                                | EventType.FileClose
                                                | EventType.Command
-                                               | EventType.UIRefresh
-                                               | EventType.Keys);
+                                               | EventType.UIRefresh);
         }
 
         private static List<String> HAXEUI_COMPONENTS = new List<String>{

@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using System.Xml;
 using System.IO;
 using System.Drawing;
+using PluginCore.Controls;
 
 namespace HaxeUILayoutPreview {
     class TabDetails {
@@ -24,6 +25,11 @@ namespace HaxeUILayoutPreview {
             ITabbedDocument tdoc = PluginBase.MainForm.CurrentDocument as ITabbedDocument;
             strips.Add(AddTabStrip(tdoc.SplitSci1));
             strips.Add(AddTabStrip(tdoc.SplitSci2));
+            UITools.Manager.OnTextChanged += new UITools.TextChangedHandler(Manager_OnTextChanged);
+        }
+
+        void Manager_OnTextChanged(ScintillaNet.ScintillaControl sender, int position, int length, int linesAdded) {
+            UpdatePreviews();
         }
 
         private Messir.Windows.Forms.TabStrip AddTabStrip(Control editor) {
@@ -190,9 +196,6 @@ namespace HaxeUILayoutPreview {
                 UpdatePreview(1);
                 //RedirectTrace(1, pluginMain.settingObject.RedirectTrace);
             }
-            if (pluginMain.settingObject.HideMiniMap == true) {
-                HideMiniMap();
-            }
         }
 
         private void UpdatePreview(int paneIndex) {
@@ -218,7 +221,7 @@ namespace HaxeUILayoutPreview {
             return miniMap;
         }
 
-        private void HideMiniMap() {
+        public void HideMiniMap() {
             Control miniMap = GetMiniMap();
             if (miniMap != null) {
                 miniMap.Hide();
