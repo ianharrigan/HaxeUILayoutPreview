@@ -22,7 +22,7 @@ namespace HaxeUILayoutPreview
         private String pluginDesc = "HaxeUI Layout Previewer";
         private String pluginAuth = "Ian Harrigan";
         private String settingFilename;
-        private Settings settingObject;
+        public Settings settingObject;
         private Image pluginImage;
 
         private PluginConsole pluginConsole;

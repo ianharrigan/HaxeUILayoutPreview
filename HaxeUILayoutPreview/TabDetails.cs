@@ -21,7 +21,6 @@ namespace HaxeUILayoutPreview {
             ITabbedDocument tdoc = PluginBase.MainForm.CurrentDocument as ITabbedDocument;
             strips.Add(AddTabStrip(tdoc.SplitSci1));
             strips.Add(AddTabStrip(tdoc.SplitSci2));
-            //GetMiniMap().Hide();
         }
 
         private Messir.Windows.Forms.TabStrip AddTabStrip(Control editor) {
@@ -123,6 +122,9 @@ namespace HaxeUILayoutPreview {
             if (HasPreviewPlayer(1)) {
                 UpdatePreview(1);
             }
+            if (pluginMain.settingObject.HideMiniMap == true) {
+                GetMiniMap().Hide();
+            }
         }
 
         private void UpdatePreview(int paneIndex) {
@@ -141,7 +143,6 @@ namespace HaxeUILayoutPreview {
 
         private Control GetMiniMap() {
             ITabbedDocument tdoc = PluginBase.MainForm.CurrentDocument as ITabbedDocument;
-            pluginMain.ConsoleLog("" + tdoc.Controls[1]);
             return tdoc.Controls[1];
         }
 
