@@ -11,3 +11,5 @@ TODO:
  - Enable theme changes from FD
  - Enable container resizing from FD
  - Enable DPI modification from FD
+ - Change plugin icon
+ 
