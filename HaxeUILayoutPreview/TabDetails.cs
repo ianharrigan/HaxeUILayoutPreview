@@ -113,14 +113,16 @@ namespace HaxeUILayoutPreview {
             XmlAttributeCollection attributes = document.FirstChild.Attributes;
             String command = attributes.Item(0).InnerText;
             XmlNodeList list = document.GetElementsByTagName("arguments");
+            string resourceId = null;
+            string resourcePath = null;
             switch (command) {
                 case "callbacksReady":
                         UpdatePreview(paneIndex);
                     break;
 
                 case "getBitmapData":
-                        string resourceId = list[0].InnerText;
-                        string resourcePath = this.applicationDescriptor.ResolveResource(resourceId);
+                        resourceId = list[0].InnerText;
+                        resourcePath = this.applicationDescriptor.ResolveResource(resourceId);
                         //pluginMain.ConsoleLog("Bitmap '" + resourceId + "' resolved to: " + resourcePath);
                         if (resourceId != null) {
                             List<int> ints = new List<int>();
@@ -141,6 +143,27 @@ namespace HaxeUILayoutPreview {
                             string xmlReturnValue = "<string>" + bmp.Width + "|" + bmp.Height + "|" + base64 + "</string>";
                             player.SetReturnValue(xmlReturnValue);
                         }
+                    break;
+
+                case "getText":
+                    resourceId = list[0].InnerText;
+                    resourcePath = this.applicationDescriptor.ResolveResource(resourceId);
+                    if (resourceId != null) {
+                        string fileContents = File.ReadAllText(resourcePath);
+                        string xmlReturnValue = "<string>" + fileContents + "</string>";
+                        player.SetReturnValue(xmlReturnValue);
+                    }
+                    break;
+
+                case "getBytes":
+                    resourceId = list[0].InnerText;
+                    resourcePath = this.applicationDescriptor.ResolveResource(resourceId);
+                    if (resourceId != null) {
+                        Byte[] fileContents = File.ReadAllBytes(resourcePath);
+                        String base64 = Convert.ToBase64String(fileContents);
+                        string xmlReturnValue = "<string>" + base64 + "</string>";
+                        player.SetReturnValue(xmlReturnValue);
+                    }
                     break;
             }
         }
