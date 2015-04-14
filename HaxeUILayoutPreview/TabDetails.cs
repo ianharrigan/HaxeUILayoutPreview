@@ -93,6 +93,14 @@ namespace HaxeUILayoutPreview {
             return player;
         }
 
+        public void RedirectTrace(int paneIndex, bool redirect) {
+            ITabbedDocument tdoc = PluginBase.MainForm.CurrentDocument as ITabbedDocument;
+            ScintillaNet.ScintillaControl editor = (paneIndex == 0) ? tdoc.SplitSci1 : tdoc.SplitSci2;
+            AxShockwaveFlashObjects.AxShockwaveFlash player = players[paneIndex];
+            string param = (redirect == true) ? "true" : "false";
+            player.CallFunction("<invoke name=\"redirectTrace\" returntype=\"xml\"><string>" + param + "</string></invoke>");
+        }
+
         private AxShockwaveFlashObjects.AxShockwaveFlash CreatePreviewPlayer() {
             AxShockwaveFlashObjects.AxShockwaveFlash player = new AxShockwaveFlashObjects.AxShockwaveFlash();
             ((System.ComponentModel.ISupportInitialize)(player)).BeginInit();
@@ -165,15 +173,22 @@ namespace HaxeUILayoutPreview {
                         player.SetReturnValue(xmlReturnValue);
                     }
                     break;
+
+                case "trace":
+                    string message = list[0].InnerText;
+                    pluginMain.ConsoleLog(message);
+                    break;
             }
         }
 
         public void UpdatePreviews() {
             if (HasPreviewPlayer(0)) {
                 UpdatePreview(0);
+                //RedirectTrace(0, pluginMain.settingObject.RedirectTrace);
             }
             if (HasPreviewPlayer(1)) {
                 UpdatePreview(1);
+                //RedirectTrace(1, pluginMain.settingObject.RedirectTrace);
             }
             if (pluginMain.settingObject.HideMiniMap == true) {
                 GetMiniMap().Hide();

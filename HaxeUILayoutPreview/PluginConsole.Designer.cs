@@ -34,6 +34,7 @@ namespace HaxeUILayoutPreview {
             this.consoleData.Location = new System.Drawing.Point(0, 0);
             this.consoleData.Multiline = true;
             this.consoleData.Name = "consoleData";
+            this.consoleData.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.consoleData.Size = new System.Drawing.Size(150, 150);
             this.consoleData.TabIndex = 0;
             this.consoleData.WordWrap = false;

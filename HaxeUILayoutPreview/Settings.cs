@@ -9,6 +9,7 @@ namespace HaxeUILayoutPreview {
     public class Settings {
         private Boolean showConsole = false;
         private Boolean hideMiniMap = true;
+        private Boolean redirectTrace = true;
         private Keys consoleShortcut = Keys.Control | Keys.F7;
 
         [Description("Show the console by default or not"), DefaultValue(false)]
@@ -21,6 +22,12 @@ namespace HaxeUILayoutPreview {
         public Boolean HideMiniMap {
             get { return this.hideMiniMap; }
             set { this.hideMiniMap = value; }
+        }
+
+        [Description("Redirect Haxe trace statements to FlashDevelop"), DefaultValue(true)]
+        public Boolean RedirectTrace {
+            get { return this.redirectTrace; }
+            set { this.redirectTrace = value; }
         }
 
         [Description("Shortcut to open console."), DefaultValue(Keys.Control | Keys.F7)]

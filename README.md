@@ -6,7 +6,6 @@ FlashDevelop plugin to enable previewing and live editing of HaxeUI xml layouts
 
 TODO:
 -------------------------
- - Redirect haxe "trace" to FD
  - Enable theme changes from FD
  - Enable container resizing from FD
  - Enable DPI modification from FD

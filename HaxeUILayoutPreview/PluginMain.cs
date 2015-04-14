@@ -125,7 +125,8 @@ namespace HaxeUILayoutPreview
                                                | EventType.FileSwitch
                                                | EventType.FileClose
                                                | EventType.Command
-                                               | EventType.UIRefresh);
+                                               | EventType.UIRefresh
+                                               | EventType.Keys);
         }
 
         private static List<String> HAXEUI_COMPONENTS = new List<String>{
