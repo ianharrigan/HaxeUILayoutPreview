@@ -18,6 +18,7 @@ namespace HaxeUILayoutPreview {
         private PluginMain pluginMain;
         private List<Messir.Windows.Forms.TabStrip> strips = new List<Messir.Windows.Forms.TabStrip>();
         private List<AxShockwaveFlashObjects.AxShockwaveFlash> players = new List<AxShockwaveFlashObjects.AxShockwaveFlash>();
+        private List<PreviewOptions> options = new List<PreviewOptions>();
         private OpenFLApplicationDescriptor applicationDescriptor;
 
         public TabDetails(PluginMain pluginMain) {
@@ -65,12 +66,14 @@ namespace HaxeUILayoutPreview {
                 editor.Show();
                 if (HasPreviewPlayer(paneIndex) == true) {
                     GetPreviewPlayer(paneIndex).Hide();
+                    options[paneIndex].Hide();
                 }
             } else if (e.SelectedTab.Text == "Preview") {
                 editor.Hide();
                 if (HasPreviewPlayer(paneIndex) == true) {
                     UpdatePreview(paneIndex);
                     GetPreviewPlayer(paneIndex).Show();
+                    options[paneIndex].Show();
                 } else {
                     AxShockwaveFlashObjects.AxShockwaveFlash player = GetPreviewPlayer(paneIndex);
                 }
@@ -95,6 +98,12 @@ namespace HaxeUILayoutPreview {
                 //filename = "Z:\\GitHub\\flashdevelop-preview-container\\bin\\flash\\bin\\flashdeveloppreviewcontainer.swf";
                 player.LoadMovie(0, filename);
                 player.Play();
+
+                PreviewOptions optionsPanel = new PreviewOptions(player);
+                optionsPanel.Dock = DockStyle.Right;
+                editor.Parent.Controls.Add(optionsPanel);
+                options.Add(optionsPanel);
+
             }
             return player;
         }
@@ -229,6 +238,11 @@ namespace HaxeUILayoutPreview {
         }
 
         public void Dispose() {
+            foreach (PreviewOptions panel in options) {
+                panel.Dispose();
+            }
+            options = new List<PreviewOptions>();
+
             foreach (AxShockwaveFlashObjects.AxShockwaveFlash player in players) {
                 player.Dispose();
             }
