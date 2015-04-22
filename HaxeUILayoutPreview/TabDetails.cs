@@ -7,18 +7,50 @@ using System.Xml;
 using PluginCore;
 
 namespace HaxeUILayoutPreview {
+    class TabArtifacts {
+        public Messir.Windows.Forms.TabStrip strip;
+        public AxShockwaveFlashObjects.AxShockwaveFlash player;
+        public PreviewOptions previewOptions;
+    }
+
     class TabDetails {
         private PluginMain pluginMain;
-        private List<Messir.Windows.Forms.TabStrip> strips = new List<Messir.Windows.Forms.TabStrip>();
-        private List<AxShockwaveFlashObjects.AxShockwaveFlash> players = new List<AxShockwaveFlashObjects.AxShockwaveFlash>();
-        private List<PreviewOptions> options = new List<PreviewOptions>();
+        private List<TabArtifacts> artifacts = new List<TabArtifacts>();
         private OpenFLApplicationDescriptor applicationDescriptor;
 
         public TabDetails(PluginMain pluginMain) {
             this.pluginMain = pluginMain;
             ITabbedDocument tdoc = PluginBase.MainForm.CurrentDocument as ITabbedDocument;
-            strips.Add(AddTabStrip(tdoc.SplitSci1));
-            strips.Add(AddTabStrip(tdoc.SplitSci2));
+            this.artifacts.Add(CreateArtifacts(tdoc.SplitSci1));
+            this.artifacts.Add(CreateArtifacts(tdoc.SplitSci2));
+        }
+
+        private TabArtifacts CreateArtifacts(Control editor) {
+            TabArtifacts t = new TabArtifacts();
+            t.strip = AddTabStrip(editor);
+            return t;
+        }
+
+        private int FindIndexFromStrip(Messir.Windows.Forms.TabStrip strip) {
+            TabArtifacts t = null;
+            foreach (TabArtifacts test in this.artifacts) {
+                if (test.strip == strip) {
+                    t = test;
+                    break;
+                }
+            }
+            return this.artifacts.IndexOf(t);
+        }
+
+        private int FindIndexFromPlayer(AxShockwaveFlashObjects.AxShockwaveFlash player) {
+            TabArtifacts t = null;
+            foreach (TabArtifacts test in this.artifacts) {
+                if (test.player == player) {
+                    t = test;
+                    break;
+                }
+            }
+            return this.artifacts.IndexOf(t);
         }
 
         private Messir.Windows.Forms.TabStrip AddTabStrip(Control editor) {
@@ -48,20 +80,20 @@ namespace HaxeUILayoutPreview {
         private void strip_SelectedTabChanged(object sender, Messir.Windows.Forms.SelectedTabChangedEventArgs e) {
             ITabbedDocument tdoc = PluginBase.MainForm.CurrentDocument as ITabbedDocument;
             Messir.Windows.Forms.TabStrip tabStrip = sender as Messir.Windows.Forms.TabStrip;
-            int paneIndex = strips.IndexOf(tabStrip);
+            int paneIndex = FindIndexFromStrip(tabStrip);
             ScintillaNet.ScintillaControl editor = (paneIndex == 0) ? tdoc.SplitSci1 : tdoc.SplitSci2;
             if (e.SelectedTab.Text == "Source") {
                 editor.Show();
                 if (HasPreviewPlayer(paneIndex) == true) {
                     GetPreviewPlayer(paneIndex).Hide();
-                    options[paneIndex].Hide();
+                    this.artifacts[paneIndex].previewOptions.Hide();
                 }
             } else if (e.SelectedTab.Text == "Preview") {
                 editor.Hide();
                 if (HasPreviewPlayer(paneIndex) == true) {
                     UpdatePreview(paneIndex);
                     GetPreviewPlayer(paneIndex).Show();
-                    options[paneIndex].Show();
+                    this.artifacts[paneIndex].previewOptions.Show();
                 } else {
                     AxShockwaveFlashObjects.AxShockwaveFlash player = GetPreviewPlayer(paneIndex);
                 }
@@ -69,18 +101,21 @@ namespace HaxeUILayoutPreview {
         }
 
         private bool HasPreviewPlayer(int paneIndex) {
-            return (players.Count > paneIndex);
+            if (artifacts.Count > paneIndex) {
+                return (this.artifacts[paneIndex].player != null);
+            }
+            return false;
         }
 
         private AxShockwaveFlashObjects.AxShockwaveFlash GetPreviewPlayer(int paneIndex) {
             AxShockwaveFlashObjects.AxShockwaveFlash player = null;
-            if (players.Count > paneIndex) {
-                player = players[paneIndex];
+            if (HasPreviewPlayer(paneIndex) == true) {
+                player = this.artifacts[paneIndex].player;
             } else {
                 ITabbedDocument tdoc = PluginBase.MainForm.CurrentDocument as ITabbedDocument;
                 ScintillaNet.ScintillaControl editor = (paneIndex == 0) ? tdoc.SplitSci1 : tdoc.SplitSci2;
                 player = CreatePreviewPlayer();
-                players.Add(player);
+                this.artifacts[paneIndex].player = player;
                 editor.Parent.Controls.Add(player);
                 string filename = Util.ExtractPreviewContainer();
                 //filename = "Z:\\GitHub\\flashdevelop-preview-container\\bin\\flash\\bin\\flashdeveloppreviewcontainer.swf";
@@ -90,7 +125,7 @@ namespace HaxeUILayoutPreview {
                 PreviewOptions optionsPanel = new PreviewOptions(player);
                 optionsPanel.Dock = DockStyle.Right;
                 editor.Parent.Controls.Add(optionsPanel);
-                options.Add(optionsPanel);
+                this.artifacts[paneIndex].previewOptions = optionsPanel;
 
             }
             return player;
@@ -99,7 +134,7 @@ namespace HaxeUILayoutPreview {
         public void RedirectTrace(int paneIndex, bool redirect) {
             ITabbedDocument tdoc = PluginBase.MainForm.CurrentDocument as ITabbedDocument;
             ScintillaNet.ScintillaControl editor = (paneIndex == 0) ? tdoc.SplitSci1 : tdoc.SplitSci2;
-            AxShockwaveFlashObjects.AxShockwaveFlash player = players[paneIndex];
+            AxShockwaveFlashObjects.AxShockwaveFlash player = this.artifacts[paneIndex].player;
             string param = (redirect == true) ? "true" : "false";
             player.CallFunction("<invoke name=\"redirectTrace\" returntype=\"xml\"><string>" + param + "</string></invoke>");
         }
@@ -117,7 +152,7 @@ namespace HaxeUILayoutPreview {
 
         private void player_FlashCall(object sender, AxShockwaveFlashObjects._IShockwaveFlashEvents_FlashCallEvent e) {
             AxShockwaveFlashObjects.AxShockwaveFlash player = sender as AxShockwaveFlashObjects.AxShockwaveFlash;
-            int paneIndex = players.IndexOf(player);
+            int paneIndex = FindIndexFromPlayer(player);
 
             XmlDocument document = new XmlDocument();
             document.LoadXml(e.request);
@@ -198,7 +233,7 @@ namespace HaxeUILayoutPreview {
         private void UpdatePreview(int paneIndex) {
             ITabbedDocument tdoc = PluginBase.MainForm.CurrentDocument as ITabbedDocument;
             ScintillaNet.ScintillaControl editor = (paneIndex == 0) ? tdoc.SplitSci1 : tdoc.SplitSci2;
-            AxShockwaveFlashObjects.AxShockwaveFlash player = players[paneIndex];
+            AxShockwaveFlashObjects.AxShockwaveFlash player = this.artifacts[paneIndex].player;
             string xmlString = editor.Text;
             try {
                 XmlDocument document = new XmlDocument();
@@ -226,20 +261,18 @@ namespace HaxeUILayoutPreview {
         }
 
         public void Dispose() {
-            foreach (PreviewOptions panel in options) {
-                panel.Dispose();
+            foreach (TabArtifacts t in this.artifacts) {
+                if (t.previewOptions != null) {
+                    t.previewOptions.Dispose();
+                }
+                if (t.player != null) {
+                    t.player.Dispose();
+                }
+                if (t.strip != null) {
+                    t.strip.Dispose();
+                }
             }
-            options = new List<PreviewOptions>();
-
-            foreach (AxShockwaveFlashObjects.AxShockwaveFlash player in players) {
-                player.Dispose();
-            }
-            players = new List<AxShockwaveFlashObjects.AxShockwaveFlash>();
-
-            foreach (Messir.Windows.Forms.TabStrip strip in strips) {
-                strip.Dispose();
-            }
-            strips = new List<Messir.Windows.Forms.TabStrip>();
+            this.artifacts = new List<TabArtifacts>();
         }
     }
 }
