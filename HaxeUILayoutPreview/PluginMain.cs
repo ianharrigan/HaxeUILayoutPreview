@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Drawing;
-using System.Windows.Forms;
 using System.ComponentModel;
-using WeifenLuo.WinFormsUI.Docking;
-using PluginCore.Localization;
-using PluginCore.Utilities;
-using PluginCore.Managers;
-using PluginCore.Helpers;
-using PluginCore;
+using System.Drawing;
+using System.IO;
+using System.Windows.Forms;
 using System.Xml;
+using PluginCore;
+using PluginCore.Controls;
+using PluginCore.Helpers;
+using PluginCore.Managers;
+using PluginCore.Utilities;
+using WeifenLuo.WinFormsUI.Docking;
 
 namespace HaxeUILayoutPreview
 {
@@ -83,32 +83,35 @@ namespace HaxeUILayoutPreview
         public void HandleEvent(Object sender, NotifyEvent e, HandlingPriority prority) {
             ITabbedDocument tdoc = PluginBase.MainForm.CurrentDocument as ITabbedDocument;
 
-            switch (e.Type) {
-                case EventType.FileOpen:
-                case EventType.FileSwitch: // use switch also as we are basing detection on content
-                    if (IsHaxeUILayout(tdoc) == true) {
-                        TabDetails details = GetTabDetails(tdoc);
-                    }
-                    break;
-
-                case EventType.FileClose:
-                    DisposeTabDetails(tdoc);
-                    break;
-
-                case EventType.Command:
-                    string cmd = (e as DataEvent).Action;
-                    //ConsoleLog("detected command " + cmd);
-                    break;
-
-                case EventType.UIRefresh:
-                    if (tabDetails.ContainsKey(tdoc)) {
-                        TabDetails details = GetTabDetails(tdoc);
-                        if (settingObject.HideMiniMap == true) {
-                            details.HideMiniMap();
+            if (tdoc != null) {
+                switch (e.Type) {
+                    case EventType.FileOpen:
+                    case EventType.FileSwitch: // use switch also as we are basing detection on content
+                        if (IsHaxeUILayout(tdoc) == true) {
+                            TabDetails details = GetTabDetails(tdoc);
                         }
-                    }
-                    break;
+                        break;
+
+                    case EventType.FileClose:
+                        DisposeTabDetails(tdoc);
+                        break;
+
+                    case EventType.Command:
+                        string cmd = (e as DataEvent).Action;
+                        //ConsoleLog("detected command " + cmd);
+                        break;
+
+                    case EventType.UIRefresh:
+                        if (tabDetails.ContainsKey(tdoc)) {
+                            TabDetails details = GetTabDetails(tdoc);
+                            if (settingObject.HideMiniMap == true) {
+                                details.HideMiniMap();
+                            }
+                        }
+                        break;
+                }
             }
+
         }
 
         #endregion
@@ -128,6 +131,20 @@ namespace HaxeUILayoutPreview
                                                | EventType.FileClose
                                                | EventType.Command
                                                | EventType.UIRefresh);
+
+            UITools.Manager.OnTextChanged += new UITools.TextChangedHandler(Manager_OnTextChanged);
+        }
+
+        void Manager_OnTextChanged(ScintillaNet.ScintillaControl sender, int position, int length, int linesAdded) {
+            ITabbedDocument tdoc = PluginBase.MainForm.CurrentDocument as ITabbedDocument;
+            if (tdoc != null) {
+                if (tabDetails.ContainsKey(tdoc)) {
+                    TabDetails details = GetTabDetails(tdoc);
+                    if (settingObject.HideMiniMap == true) {
+                        details.UpdatePreviews();
+                    }
+                }
+            }
         }
 
         private static List<String> HAXEUI_COMPONENTS = new List<String>{
@@ -141,8 +158,11 @@ namespace HaxeUILayoutPreview
         };
 
         private bool IsHaxeUILayout(ITabbedDocument tdoc) {
-            string content = tdoc.SciControl.Text.ToLower();
+            if (tdoc == null || tdoc.SciControl == null) {
+                return false;
+            }
             try {
+                string content = tdoc.SciControl.Text.ToLower();
                 XmlDocument document = new XmlDocument();
                 document.LoadXml(content);
                 foreach (string c in HAXEUI_COMPONENTS) { // TODO: probably not the best way to do this

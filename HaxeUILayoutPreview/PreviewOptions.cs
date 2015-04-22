@@ -23,5 +23,10 @@ namespace HaxeUILayoutPreview {
             string themeName = theme.Text;
             player.CallFunction("<invoke name=\"setTheme\" returntype=\"xml\"><arguments><string>" + themeName + "</string></arguments></invoke>");
         }
+
+        private void trackBar1_Scroll(object sender, EventArgs e) {
+            player.Dock = DockStyle.None;
+            player.Width = 100;
+        }
     }
 }

@@ -1,17 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using PluginCore.Localization;
-using PluginCore.Utilities;
-using PluginCore.Managers;
-using PluginCore.Helpers;
-using PluginCore;
+using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 using System.Xml;
-using System.IO;
-using System.Drawing;
-using PluginCore.Controls;
+using PluginCore;
 
 namespace HaxeUILayoutPreview {
     class TabDetails {
@@ -26,11 +19,6 @@ namespace HaxeUILayoutPreview {
             ITabbedDocument tdoc = PluginBase.MainForm.CurrentDocument as ITabbedDocument;
             strips.Add(AddTabStrip(tdoc.SplitSci1));
             strips.Add(AddTabStrip(tdoc.SplitSci2));
-            UITools.Manager.OnTextChanged += new UITools.TextChangedHandler(Manager_OnTextChanged);
-        }
-
-        void Manager_OnTextChanged(ScintillaNet.ScintillaControl sender, int position, int length, int linesAdded) {
-            UpdatePreviews();
         }
 
         private Messir.Windows.Forms.TabStrip AddTabStrip(Control editor) {
