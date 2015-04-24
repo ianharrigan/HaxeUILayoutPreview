@@ -64,6 +64,12 @@
       <DependentUpon>PluginConsole.cs</DependentUpon>
     </Compile>
     <Compile Include="PluginMain.cs" />
+    <Compile Include="PreviewContainer.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PreviewContainer.Designer.cs">
+      <DependentUpon>PreviewContainer.cs</DependentUpon>
+    </Compile>
     <Compile Include="PreviewOptions.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -71,6 +77,9 @@
       <DependentUpon>PreviewOptions.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ResizablePlayer.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -86,6 +95,9 @@
   <ItemGroup>
     <EmbeddedResource Include="PluginConsole.resx">
       <DependentUpon>PluginConsole.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PreviewContainer.resx">
+      <DependentUpon>PreviewContainer.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PreviewOptions.resx">
       <DependentUpon>PreviewOptions.cs</DependentUpon>

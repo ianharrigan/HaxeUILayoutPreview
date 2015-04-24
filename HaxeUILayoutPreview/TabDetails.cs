@@ -10,7 +10,7 @@ namespace HaxeUILayoutPreview {
     class TabArtifacts {
         public Messir.Windows.Forms.TabStrip strip;
         public AxShockwaveFlashObjects.AxShockwaveFlash player;
-        public PreviewOptions previewOptions;
+        public PreviewContainer previewContainer;
     }
 
     class TabDetails {
@@ -59,6 +59,7 @@ namespace HaxeUILayoutPreview {
             strip.FlipButtons = true;
             strip.RenderStyle = System.Windows.Forms.ToolStripRenderMode.System;
             strip.UseVisualStyles = false;
+            strip.GripStyle = ToolStripGripStyle.Hidden;
 
             Messir.Windows.Forms.TabStripButton sourceButton = new Messir.Windows.Forms.TabStripButton();
             sourceButton.Text = "Source";
@@ -85,15 +86,13 @@ namespace HaxeUILayoutPreview {
             if (e.SelectedTab.Text == "Source") {
                 editor.Show();
                 if (HasPreviewPlayer(paneIndex) == true) {
-                    GetPreviewPlayer(paneIndex).Hide();
-                    this.artifacts[paneIndex].previewOptions.Hide();
+                    this.artifacts[paneIndex].previewContainer.Hide();
                 }
             } else if (e.SelectedTab.Text == "Preview") {
                 editor.Hide();
                 if (HasPreviewPlayer(paneIndex) == true) {
                     UpdatePreview(paneIndex);
-                    GetPreviewPlayer(paneIndex).Show();
-                    this.artifacts[paneIndex].previewOptions.Show();
+                    this.artifacts[paneIndex].previewContainer.Show();
                 } else {
                     AxShockwaveFlashObjects.AxShockwaveFlash player = GetPreviewPlayer(paneIndex);
                 }
@@ -116,17 +115,14 @@ namespace HaxeUILayoutPreview {
                 ScintillaNet.ScintillaControl editor = (paneIndex == 0) ? tdoc.SplitSci1 : tdoc.SplitSci2;
                 player = CreatePreviewPlayer();
                 this.artifacts[paneIndex].player = player;
-                editor.Parent.Controls.Add(player);
+                PreviewContainer container = new PreviewContainer(player);
+                container.Dock = DockStyle.Fill;
+                editor.Parent.Controls.Add(container);
+                this.artifacts[paneIndex].previewContainer = container;
                 string filename = Util.ExtractPreviewContainer();
                 //filename = "Z:\\GitHub\\flashdevelop-preview-container\\bin\\flash\\bin\\flashdeveloppreviewcontainer.swf";
                 player.LoadMovie(0, filename);
                 player.Play();
-
-                PreviewOptions optionsPanel = new PreviewOptions(player);
-                optionsPanel.Dock = DockStyle.Right;
-                editor.Parent.Controls.Add(optionsPanel);
-                this.artifacts[paneIndex].previewOptions = optionsPanel;
-
             }
             return player;
         }
@@ -140,7 +136,7 @@ namespace HaxeUILayoutPreview {
         }
 
         private AxShockwaveFlashObjects.AxShockwaveFlash CreatePreviewPlayer() {
-            AxShockwaveFlashObjects.AxShockwaveFlash player = new AxShockwaveFlashObjects.AxShockwaveFlash();
+            AxShockwaveFlashObjects.AxShockwaveFlash player = new ResizablePlayer();// new AxShockwaveFlashObjects.AxShockwaveFlash();
             ((System.ComponentModel.ISupportInitialize)(player)).BeginInit();
             player.Dock = System.Windows.Forms.DockStyle.Fill;
             player.Enabled = true;
@@ -262,8 +258,8 @@ namespace HaxeUILayoutPreview {
 
         public void Dispose() {
             foreach (TabArtifacts t in this.artifacts) {
-                if (t.previewOptions != null) {
-                    t.previewOptions.Dispose();
+                if (t.previewContainer != null) {
+                    t.previewContainer.Dispose();
                 }
                 if (t.player != null) {
                     t.player.Dispose();
